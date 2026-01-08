@@ -37,7 +37,7 @@ def extract_from_file(file_path, trigger_string):
 
 def main():
     # --- ARGUMENT SETUP ---
-    parser = argparse.ArgumentParser(description="Extract code blocks from Markdown to YAML.")
+    parser = argparse.ArgumentParser(description="Extract code blocks that follow a trigger string from Markdown to YAML.")
     
     parser.add_argument(
         "-i", "--input", 
@@ -51,8 +51,8 @@ def main():
     )
     parser.add_argument(
         "--trigger", 
-        default="## Solution", 
-        help="The string to search for. Defaults to '## Solution'."
+        default="YAML", 
+        help="The string to search for. Defaults to the string 'YAML'."
     )
 
     args = parser.parse_args()
