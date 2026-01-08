@@ -4,6 +4,14 @@ import yaml
 import argparse
 import sys
 
+def str_presenter(dumper, data):
+    """Configures yaml for dump to look like a block literal"""
+    if len(data.splitlines()) > 1:  # check for multiline string
+        return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+
+yaml.add_representer(str, str_presenter)
+
 def extract_from_file(file_path, trigger_string):
     """
     Helper function to read a file and extract code blocks after the trigger.
