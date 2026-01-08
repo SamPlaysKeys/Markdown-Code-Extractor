@@ -58,6 +58,24 @@ python extract_cli.py -i ./docs -o ./output --trigger "### Code Example"
 
 ```
 
+## Example
+
+```bash
+python extract_cli.py -i ./docs -o ./output/{filename}/output.yaml
+```
+
+```
+docs/
+├── file1.md
+└── file2.md
+
+output/
+├── file1/
+│   └── output.yaml
+└── file2/
+    └── output.yaml
+```
+
 ## Future Plans
 
 I am planning to do more work on this as I learn more. Some features I'm hoping to add include:
