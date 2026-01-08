@@ -61,28 +61,36 @@ def main():
     
     # CASE 1: Input is a Directory
     if os.path.isdir(args.input):
-        # Ensure output is a directory (create if needed)
-        if not os.path.exists(args.output):
-            os.makedirs(args.output)
-            print(f"Created output directory: {args.output}")
-        
         count = 0
         for filename in os.listdir(args.input):
             if filename.endswith(".md"):
                 source_path = os.path.join(args.input, filename)
+                file_stem = os.path.splitext(filename)[0]
+                first_word = file_stem.split(' ')[0]
                 
+                # Determine output directory (handle placeholders)
+                current_output_dir = args.output
+                if "$filename" in current_output_dir:
+                    current_output_dir = current_output_dir.replace("$filename", file_stem)
+                if "$firstword" in current_output_dir:
+                    current_output_dir = current_output_dir.replace("$firstword", first_word)
+                
+                # Ensure output directory exists
+                if not os.path.exists(current_output_dir):
+                    os.makedirs(current_output_dir)
+
                 # Create output filename: input.md -> input.yaml
-                out_name = os.path.splitext(filename)[0] + ".yaml"
-                dest_path = os.path.join(args.output, out_name)
+                out_name = file_stem + ".yaml"
+                dest_path = os.path.join(current_output_dir, out_name)
                 
                 blocks = extract_from_file(source_path, args.trigger)
                 
                 if blocks:
                     with open(dest_path, "w", encoding="utf-8") as outfile:
                         yaml.dump(blocks, outfile, default_flow_style=False, allow_unicode=True)
-                    print(f"Processed: {filename} -> {out_name}")
+                    print(f"Processed: {filename} -> {dest_path}")
                     count += 1
-        print(f"--- Batch Complete. Created {count} YAML files in '{args.output}' ---")
+        print(f"--- Batch Complete. Created {count} YAML files. ---")
 
     # CASE 2: Input is a Single File
     elif os.path.isfile(args.input):
