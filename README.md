@@ -68,4 +68,4 @@ I am planning to do more work on this as I learn more. Some features I'm hoping 
 
 ## License
 
-Feel free to use this however you like!
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
