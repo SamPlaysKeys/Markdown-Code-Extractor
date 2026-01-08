@@ -20,8 +20,8 @@ class IndentedDumper(yaml.Dumper):
 
 def extract_from_file(file_path, trigger_string):
     """
-    Helper function to read a file and extract code blocks after the trigger.
-    Returns a list of code blocks (strings) or None if no trigger found.
+    Helper function to read a file and extract the first code block after the trigger.
+    Returns a list containing the first code block (string) or None if no trigger found.
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -33,9 +33,9 @@ def extract_from_file(file_path, trigger_string):
             
             # Regex for code blocks
             code_block_pattern = re.compile(r"```(?:\w+)?\n(.*?)```", re.DOTALL)
-            matches = code_block_pattern.findall(relevant_content)
+            match = code_block_pattern.search(relevant_content)
             
-            return [m.strip() for m in matches] if matches else []
+            return [match.group(1).strip()] if match else []
         return None
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
