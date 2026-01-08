@@ -1,51 +1,99 @@
 import os
 import re
 import yaml
+import argparse
+import sys
 
-# --- CONFIGURATION ---
-SEARCH_DIR = "."                  # Directory containing .md files
-TRIGGER_STRING = "## Solution"    # The string to look for
-OUTPUT_FILE = "extracted_code.yaml"
-# ---------------------
+def extract_from_file(file_path, trigger_string):
+    """
+    Helper function to read a file and extract code blocks after the trigger.
+    Returns a list of code blocks (strings) or None if no trigger found.
+    """
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
 
-def extract_code_blocks():
-    # Dictionary to store results: { filename: [code_block_1, code_block_2] }
-    extracted_data = {}
-
-    # Regex to find code blocks enclosed in triple backticks
-    # captures content inside ```...```
-    code_block_pattern = re.compile(r"```(?:\w+)?\n(.*?)```", re.DOTALL)
-
-    # Loop through all files in the directory
-    for filename in os.listdir(SEARCH_DIR):
-        if filename.endswith(".md"):
-            filepath = os.path.join(SEARCH_DIR, filename)
+        if trigger_string in content:
+            # Split and take content after the trigger
+            relevant_content = content.split(trigger_string, 1)[1]
             
-            with open(filepath, "r", encoding="utf-8") as f:
-                content = f.read()
+            # Regex for code blocks
+            code_block_pattern = re.compile(r"```(?:\w+)?\n(.*?)```", re.DOTALL)
+            matches = code_block_pattern.findall(relevant_content)
+            
+            return [m.strip() for m in matches] if matches else []
+        return None
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
+        return None
 
-            # Check if the trigger string exists in the file
-            if TRIGGER_STRING in content:
-                # Split the file and take everything AFTER the trigger string
-                # maxsplit=1 ensures we only split on the first occurrence
-                relevant_content = content.split(TRIGGER_STRING, 1)[1]
+def main():
+    # --- ARGUMENT SETUP ---
+    parser = argparse.ArgumentParser(description="Extract code blocks from Markdown to YAML.")
+    
+    parser.add_argument(
+        "-i", "--input", 
+        required=True, 
+        help="Path to input file OR directory of files."
+    )
+    parser.add_argument(
+        "-o", "--output", 
+        required=True, 
+        help="Path to output file (if input is file) OR output directory (if input is dir)."
+    )
+    parser.add_argument(
+        "--trigger", 
+        default="## Solution", 
+        help="The string to search for. Defaults to '## Solution'."
+    )
 
-                # Find all code blocks in the remaining text
-                matches = code_block_pattern.findall(relevant_content)
+    args = parser.parse_args()
 
-                if matches:
-                    # formatting: strip leading/trailing whitespace from the code itself
-                    cleaned_matches = [m.strip() for m in matches]
-                    extracted_data[filename] = cleaned_matches
+    # --- LOGIC ---
+    
+    # CASE 1: Input is a Directory
+    if os.path.isdir(args.input):
+        # Ensure output is a directory (create if needed)
+        if not os.path.exists(args.output):
+            os.makedirs(args.output)
+            print(f"Created output directory: {args.output}")
+        
+        count = 0
+        for filename in os.listdir(args.input):
+            if filename.endswith(".md"):
+                source_path = os.path.join(args.input, filename)
+                
+                # Create output filename: input.md -> input.yaml
+                out_name = os.path.splitext(filename)[0] + ".yaml"
+                dest_path = os.path.join(args.output, out_name)
+                
+                blocks = extract_from_file(source_path, args.trigger)
+                
+                if blocks:
+                    with open(dest_path, "w", encoding="utf-8") as outfile:
+                        yaml.dump(blocks, outfile, default_flow_style=False, allow_unicode=True)
+                    print(f"Processed: {filename} -> {out_name}")
+                    count += 1
+        print(f"--- Batch Complete. Created {count} YAML files in '{args.output}' ---")
 
-    # Save to YAML
-    if extracted_data:
-        with open(OUTPUT_FILE, "w", encoding="utf-8") as outfile:
-            # default_flow_style=False makes it readable (block style)
-            yaml.dump(extracted_data, outfile, default_flow_style=False, allow_unicode=True)
-        print(f"Success! Extracted code blocks from {len(extracted_data)} files into '{OUTPUT_FILE}'.")
+    # CASE 2: Input is a Single File
+    elif os.path.isfile(args.input):
+        blocks = extract_from_file(args.input, args.trigger)
+        
+        if blocks:
+            # If output path is a directory, verify valid filename provided or derive it
+            if os.path.isdir(args.output):
+                 print("Error: Input is a file, but output is a directory. Please specify a full output filename.")
+                 sys.exit(1)
+
+            with open(args.output, "w", encoding="utf-8") as outfile:
+                yaml.dump(blocks, outfile, default_flow_style=False, allow_unicode=True)
+            print(f"Success! Extracted to '{args.output}'")
+        else:
+            print(f"No blocks found in '{args.input}' after trigger '{args.trigger}'")
+
     else:
-        print("No code blocks found after the trigger string in any files.")
+        print("Error: Input path does not exist.")
 
 if __name__ == "__main__":
-    extract_code_blocks()
+    main()
