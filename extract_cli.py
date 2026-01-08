@@ -68,20 +68,24 @@ def main():
                 file_stem = os.path.splitext(filename)[0]
                 first_word = file_stem.split(' ')[0]
                 
-                # Determine output directory (handle placeholders)
-                current_output_dir = args.output
-                if "$filename" in current_output_dir:
-                    current_output_dir = current_output_dir.replace("$filename", file_stem)
-                if "$firstword" in current_output_dir:
-                    current_output_dir = current_output_dir.replace("$firstword", first_word)
+                # Determine output path (handle placeholders)
+                target_path = args.output
+                if "$filename" in target_path:
+                    target_path = target_path.replace("$filename", file_stem)
+                if "$firstword" in target_path:
+                    target_path = target_path.replace("$firstword", first_word)
+                
+                # Check if target_path looks like a file (ends in .yaml/.yml) or directory
+                if target_path.lower().endswith(('.yaml', '.yml')):
+                    dest_path = target_path
+                    dest_dir = os.path.dirname(dest_path)
+                else:
+                    dest_dir = target_path
+                    dest_path = os.path.join(dest_dir, file_stem + ".yaml")
                 
                 # Ensure output directory exists
-                if not os.path.exists(current_output_dir):
-                    os.makedirs(current_output_dir)
-
-                # Create output filename: input.md -> input.yaml
-                out_name = file_stem + ".yaml"
-                dest_path = os.path.join(current_output_dir, out_name)
+                if dest_dir and not os.path.exists(dest_dir):
+                    os.makedirs(dest_dir, exist_ok=True)
                 
                 blocks = extract_from_file(source_path, args.trigger)
                 
