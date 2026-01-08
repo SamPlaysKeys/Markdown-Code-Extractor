@@ -14,6 +14,10 @@ def str_presenter(dumper, data):
 
 yaml.add_representer(str, str_presenter)
 
+class IndentedDumper(yaml.Dumper):
+    def increase_indent(self, flow=False, indentless=False):
+        return super(IndentedDumper, self).increase_indent(flow, False)
+
 def extract_from_file(file_path, trigger_string):
     """
     Helper function to read a file and extract code blocks after the trigger.
@@ -61,6 +65,27 @@ def main():
 
     # --- LOGIC ---
     
+    def save_extracted_blocks(blocks, dest_path):
+        """
+        Parses extracted blocks as YAML and saves them to dest_path.
+        Unwraps single blocks to be the root object.
+        """
+        data_to_dump = []
+        for b in blocks:
+            try:
+                # Use safe_load_all to handle potential multi-document blocks
+                for doc in yaml.safe_load_all(b):
+                    data_to_dump.append(doc)
+            except Exception as e:
+                print(f"Warning: Failed to parse block as YAML in {dest_path}. Keeping as string. Error: {e}")
+                data_to_dump.append(b)
+
+        with open(dest_path, "w", encoding="utf-8") as outfile:
+            if len(data_to_dump) == 1:
+                yaml.dump(data_to_dump[0], outfile, Dumper=IndentedDumper, default_flow_style=False, allow_unicode=True)
+            else:
+                yaml.dump_all(data_to_dump, outfile, Dumper=IndentedDumper, default_flow_style=False, allow_unicode=True)
+
     # CASE 1: Input is a Directory
     if os.path.isdir(args.input):
         count = 0
@@ -98,8 +123,7 @@ def main():
                 blocks = extract_from_file(source_path, args.trigger)
                 
                 if blocks:
-                    with open(dest_path, "w", encoding="utf-8") as outfile:
-                        yaml.dump(blocks, outfile, default_flow_style=False, allow_unicode=True)
+                    save_extracted_blocks(blocks, dest_path)
                     print(f"Processed: {filename} -> {dest_path}")
                     count += 1
         print(f"--- Batch Complete. Created {count} YAML files. ---")
@@ -114,8 +138,7 @@ def main():
                  print("Error: Input is a file, but output is a directory. Please specify a full output filename.")
                  sys.exit(1)
 
-            with open(args.output, "w", encoding="utf-8") as outfile:
-                yaml.dump(blocks, outfile, default_flow_style=False, allow_unicode=True)
+            save_extracted_blocks(blocks, args.output)
             print(f"Success! Extracted to '{args.output}'")
         else:
             print(f"No blocks found in '{args.input}' after trigger '{args.trigger}'")
