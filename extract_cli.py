@@ -37,7 +37,7 @@ def extract_from_file(file_path, trigger_string):
 
 def main():
     # --- ARGUMENT SETUP ---
-    parser = argparse.ArgumentParser(description="Extract code blocks from Markdown to YAML.")
+    parser = argparse.ArgumentParser(description="Extract code blocks that follow a trigger string from Markdown to YAML.")
     
     parser.add_argument(
         "-i", "--input", 
@@ -51,8 +51,8 @@ def main():
     )
     parser.add_argument(
         "--trigger", 
-        default="## Solution", 
-        help="The string to search for. Defaults to '## Solution'."
+        default="YAML", 
+        help="The string to search for. Defaults to the string 'YAML'."
     )
 
     args = parser.parse_args()
@@ -61,28 +61,46 @@ def main():
     
     # CASE 1: Input is a Directory
     if os.path.isdir(args.input):
-        # Ensure output is a directory (create if needed)
-        if not os.path.exists(args.output):
-            os.makedirs(args.output)
-            print(f"Created output directory: {args.output}")
-        
         count = 0
         for filename in os.listdir(args.input):
             if filename.endswith(".md"):
                 source_path = os.path.join(args.input, filename)
+                file_stem = os.path.splitext(filename)[0]
+                first_word = file_stem.split(' ')[0]
                 
-                # Create output filename: input.md -> input.yaml
-                out_name = os.path.splitext(filename)[0] + ".yaml"
-                dest_path = os.path.join(args.output, out_name)
+                # Determine output path (handle placeholders)
+                target_path = args.output
+                replacements = {
+                    "{filename}": file_stem,
+                    "{firstword}": first_word,
+                    "$filename": file_stem,
+                    "$firstword": first_word
+                }
+                
+                for placeholder, replacement in replacements.items():
+                    if placeholder in target_path:
+                        target_path = target_path.replace(placeholder, replacement)
+                
+                # Check if target_path looks like a file (ends in .yaml/.yml) or directory
+                if target_path.lower().endswith(('.yaml', '.yml')):
+                    dest_path = target_path
+                    dest_dir = os.path.dirname(dest_path)
+                else:
+                    dest_dir = target_path
+                    dest_path = os.path.join(dest_dir, file_stem + ".yaml")
+                
+                # Ensure output directory exists
+                if dest_dir and not os.path.exists(dest_dir):
+                    os.makedirs(dest_dir, exist_ok=True)
                 
                 blocks = extract_from_file(source_path, args.trigger)
                 
                 if blocks:
                     with open(dest_path, "w", encoding="utf-8") as outfile:
                         yaml.dump(blocks, outfile, default_flow_style=False, allow_unicode=True)
-                    print(f"Processed: {filename} -> {out_name}")
+                    print(f"Processed: {filename} -> {dest_path}")
                     count += 1
-        print(f"--- Batch Complete. Created {count} YAML files in '{args.output}' ---")
+        print(f"--- Batch Complete. Created {count} YAML files. ---")
 
     # CASE 2: Input is a Single File
     elif os.path.isfile(args.input):
