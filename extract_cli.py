@@ -14,6 +14,10 @@ def str_presenter(dumper, data):
 
 yaml.add_representer(str, str_presenter)
 
+class IndentedDumper(yaml.Dumper):
+    def increase_indent(self, flow=False, indentless=False):
+        return super(IndentedDumper, self).increase_indent(flow, False)
+
 def extract_from_file(file_path, trigger_string):
     """
     Helper function to read a file and extract code blocks after the trigger.
@@ -78,9 +82,9 @@ def main():
 
         with open(dest_path, "w", encoding="utf-8") as outfile:
             if len(data_to_dump) == 1:
-                yaml.dump(data_to_dump[0], outfile, default_flow_style=False, allow_unicode=True)
+                yaml.dump(data_to_dump[0], outfile, Dumper=IndentedDumper, default_flow_style=False, allow_unicode=True)
             else:
-                yaml.dump_all(data_to_dump, outfile, default_flow_style=False, allow_unicode=True)
+                yaml.dump_all(data_to_dump, outfile, Dumper=IndentedDumper, default_flow_style=False, allow_unicode=True)
 
     # CASE 1: Input is a Directory
     if os.path.isdir(args.input):
