@@ -70,10 +70,16 @@ def main():
                 
                 # Determine output path (handle placeholders)
                 target_path = args.output
-                if "$filename" in target_path:
-                    target_path = target_path.replace("$filename", file_stem)
-                if "$firstword" in target_path:
-                    target_path = target_path.replace("$firstword", first_word)
+                replacements = {
+                    "{filename}": file_stem,
+                    "{firstword}": first_word,
+                    "$filename": file_stem,
+                    "$firstword": first_word
+                }
+                
+                for placeholder, replacement in replacements.items():
+                    if placeholder in target_path:
+                        target_path = target_path.replace(placeholder, replacement)
                 
                 # Check if target_path looks like a file (ends in .yaml/.yml) or directory
                 if target_path.lower().endswith(('.yaml', '.yml')):
