@@ -9,8 +9,11 @@ It’s nothing too fancy, but it helps bridge the gap when you need to pull code
 ## Features
 
 * **Batch Processing:** Convert a whole folder of Markdown files into corresponding YAML files.
-* **Single File Mode:** targeted extraction of a single file to a specific output name.
-* **Custom Triggers:** You can define the specific text string (e.g., `## Solution`) that tells the script where to start looking for code.
+* **Single File Mode:** Targeted extraction of a single file to a specific output name.
+* **Custom Triggers:** Define specific text strings or a list of strings (e.g., `## Solution`) to locate code blocks.
+* **Multiple Blocks:** Extract every code block after a trigger using `-a` or `--all`.
+* **Concatenation:** Combine multiple extracted blocks into one YAML file using `-c` or `--concat`.
+* **Output Placeholders:** Use `{filename}` and `{firstword}` in output paths for dynamic file naming.
 
 ## Setup
 
@@ -19,16 +22,19 @@ It’s nothing too fancy, but it helps bridge the gap when you need to pull code
 
 ```bash
 pip install -r requirements.txt
-
 ```
 
 ## How to Use
 
-The script `extract_cli.py` is run from the command line. It accepts three arguments:
+The script `extract_cli.py` is run from the command line. It accepts several arguments:
 
 * `-i` or `--input`: The path to a file or a folder of files.
-* `-o` or `--output`: The destination path.
-* `--trigger`: (Optional) The specific string to look for. Defaults to `## Solution`.
+* `-o` or `--output`: The destination path (supports `{filename}` and `{firstword}` placeholders).
+* `--trigger`: (Optional) The string(s) to look for. Defaults to `YAML`. 
+    * Single trigger: `--trigger "## Solution"`
+    * Multiple triggers: `--trigger "([Trigger 1], [Trigger 2])"`
+* `-a` or `--all`: (Optional) Extract all code blocks found after the trigger.
+* `-c` or `--concat`: (Optional) When using `-a`, combine all blocks into a single YAML file instead of splitting them.
 
 ### 1. Processing a specific file
 
@@ -36,7 +42,6 @@ Use this if you want to convert one `.md` file into one specific `.yaml` file.
 
 ```bash
 python extract_cli.py -i ./docs/my_notes.md -o ./exports/output_data.yaml
-
 ```
 
 ### 2. Processing a whole folder (Batch)
@@ -46,34 +51,67 @@ Use this if you have a directory of markdown files. The script will create a YAM
 ```bash
 # Takes all .md files in 'raw_docs' and saves .yaml files to 'processed_data'
 python extract_cli.py -i ./raw_docs -o ./processed_data
-
 ```
 
-### 3. Changing the search trigger
+### 3. Extracting Multiple Blocks
 
-If your markdown files use a different header or string to denote where the code starts (e.g., `### Code Example`), you can override the default:
+If a file has multiple code blocks after a trigger, use `-a` to get them all. By default, they are saved as separate files (`output.yaml`, `output_2.yaml`, etc.).
 
 ```bash
-python extract_cli.py -i ./docs -o ./output --trigger "### Code Example"
-
+python extract_cli.py -a -i ./docs/file.md -o ./output/data.yaml
 ```
 
-## Example
+### 4. Concatenating Blocks
+
+To combine all blocks from one file into a single multi-document YAML file:
 
 ```bash
-python extract_cli.py -i ./docs -o ./output/{filename}/output.yaml
+python extract_cli.py -a -c -i ./docs/file.md -o ./output/combined.yaml
 ```
 
+### 5. Using Multiple Triggers
+
+You can search for multiple different markers in the file:
+
+```bash
+python extract_cli.py --trigger "([Metadata], [Configuration])" -i ./docs -o ./output
+```
+
+## Examples
+
+### Dynamic Batch Output
+```bash
+python extract_cli.py -a -i ./docs -o ./output/{filename}/output.yaml
+```
+
+**Structure:**
 ```
 docs/
-├── file1.md
-└── file2.md
+├── file1.md (contains 2 blocks)
+└── file2.md (contains 1 block)
 
 output/
 ├── file1/
-│   └── output.yaml
+│   ├── output.yaml
+│   └── output_2.yaml
 └── file2/
     └── output.yaml
+```
+
+### Concatenated Batch Output
+```bash
+python extract_cli.py -a -c -i ./docs -o ./output/{filename}_all.yaml
+```
+
+**Structure:**
+```
+docs/
+├── file1.md (contains 2 blocks)
+└── file2.md (contains 1 block)
+
+output/
+├── file1_all.yaml (multi-document YAML)
+└── file2_all.yaml
 ```
 
 ## Future Plans
