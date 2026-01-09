@@ -108,9 +108,9 @@ def main():
         """Helper to write a list of data objects to a single YAML file."""
         with open(path, "w", encoding="utf-8") as outfile:
             if len(data) == 1:
-                yaml.dump(data[0], outfile, Dumper=IndentedDumper, default_flow_style=False, allow_unicode=True)
+                yaml.dump(data[0], outfile, Dumper=IndentedDumper, default_flow_style=False, allow_unicode=True, sort_keys=False)
             else:
-                yaml.dump_all(data, outfile, Dumper=IndentedDumper, default_flow_style=False, allow_unicode=True)
+                yaml.dump_all(data, outfile, Dumper=IndentedDumper, default_flow_style=False, allow_unicode=True, sort_keys=False)
 
     def save_extracted_blocks(blocks, dest_path, split_files=False):
         """
