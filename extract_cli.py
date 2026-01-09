@@ -75,7 +75,7 @@ def main():
         help="Path to output file (if input is file) OR output directory (if input is dir)."
     )
     parser.add_argument(
-        "--trigger", 
+        "-t", "--trigger", 
         default="YAML", 
         help="The string to search for. Defaults to the string 'YAML'."
     )

@@ -30,7 +30,7 @@ The script `extract_cli.py` is run from the command line. It accepts several arg
 
 * `-i` or `--input`: The path to a file or a folder of files.
 * `-o` or `--output`: The destination path (supports `{filename}` and `{firstword}` placeholders).
-* `--trigger`: (Optional) The string(s) to look for. Defaults to `YAML`. 
+* `-t` or `--trigger`: (Optional) The string(s) to look for. Defaults to `YAML`. 
     * Single trigger: `--trigger "## Solution"`
     * Multiple triggers: `--trigger "([Trigger 1], [Trigger 2])"`
 * `-a` or `--all`: (Optional) Extract all code blocks found after the trigger.
