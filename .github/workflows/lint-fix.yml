@@ -3,10 +3,8 @@ name: Python Lint and Auto-Format
 on:
   push:
     branches: ["main", "master"]
-    paths: ["**.py"]
   pull_request:
     branches: ["main", "master"]
-    paths: ["**.py"]
 
 permissions:
   contents: write
