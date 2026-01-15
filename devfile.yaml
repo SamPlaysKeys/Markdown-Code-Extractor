@@ -15,19 +15,21 @@ components:
       image: quay.io/devfile/universal-developer-image:latest
       memoryLimit: 4Gi
       mountSources: true
-    env:
-    - name: SHELL
-      value: "/bin/zsh"
-    - name: HISTFILE
-      value: "/projects/home/.sh_history"
-    - name: VSCODE_DEFAULT_WORKSPACE
-      value: "/projects/Markdown-Code-Extractor/main.code-workspace"
+      env:
+      - name: SHELL
+        value: "/bin/zsh"
+      - name: HISTFILE
+        value: "/projects/home/.sh_history"
+      - name: VSCODE_DEFAULT_WORKSPACE
+        value: "/projects/Markdown-Code-Extractor/main.code-workspace"
+      - name: VSCODE_WORKSPACE_TRUST_ENABLED
+        value: "false"
   - name: ms-python
-    chePlugin:
+    plugin:
       id: ms-python/python/latest
   - name: github-local-actions
-    chePlugin:
+    plugin:
       id: SanjulaGanepola/github-local-actions/latest
   - name: vim
-    chePlugin:
+    plugin:
       id: vscodevim/vim/latest
