@@ -2,7 +2,7 @@ schemaVersion: 2.2.0
 metadata:
   name: markdown-code-extractor
 projects:
-  - name: Markdown-Code-Extractor
+  - name: markdown-code-extractor
     git:
       checkoutFrom:
         remote: origin
@@ -21,15 +21,6 @@ components:
       - name: HISTFILE
         value: "/projects/home/.sh_history"
       - name: VSCODE_DEFAULT_WORKSPACE
-        value: "/projects/Markdown-Code-Extractor/main.code-workspace"
+        value: "/projects/markdown-code-extractor/main.code-workspace"
       - name: VSCODE_WORKSPACE_TRUST_ENABLED
         value: "false"
-  - name: ms-python
-    plugin:
-      id: ms-python/python/latest
-  - name: github-local-actions
-    plugin:
-      id: SanjulaGanepola/github-local-actions/latest
-  - name: vim
-    plugin:
-      id: vscodevim/vim/latest
