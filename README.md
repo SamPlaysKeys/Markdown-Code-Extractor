@@ -4,8 +4,6 @@ This is a small utility script designed to automate the process of extracting co
 
 It’s nothing too fancy, but it helps bridge the gap when you need to pull code examples out of documentation and into a structured data format.
 
-> **Note:** This project was coded with the assistance of Gemini AI. While it is functional and tested for the current use case, there are likely areas for improvement or edge cases that haven't been caught yet.
-
 ## Features
 
 * **Batch Processing:** Convert a whole folder of Markdown files into corresponding YAML files.

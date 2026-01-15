@@ -1,0 +1,33 @@
+schemaVersion: 2.2.0
+metadata:
+  name: markdown-code-extractor
+projects:
+  - name: Markdown-Code-Extractor
+    git:
+      checkoutFrom:
+        remote: origin
+        revision: main
+      remotes:
+        origin: "https://github.com/SamPlaysKeys/Markdown-Code-Extractor"
+components:
+  - name: tools
+    container:
+      image: quay.io/devfile/universal-developer-image:latest
+      memoryLimit: 4Gi
+      mountSources: true
+    env:
+    - name: SHELL
+      value: "/bin/zsh"
+    - name: HISTFILE
+      value: "/projects/home/.sh_history"
+    - name: VSCODE_DEFAULT_WORKSPACE
+      value: "/projects/Markdown-Code-Extractor/main.code-workspace"
+  - name: ms-python
+    chePlugin:
+      id: ms-python/python/latest
+  - name: github-local-actions
+    chePlugin:
+      id: SanjulaGanepola/github-local-actions/latest
+  - name: vim
+    chePlugin:
+      id: vscodevim/vim/latest
